@@ -10,6 +10,7 @@ library(knitr) ##Load Knitr package
 library(ggplot2) ##Plotting and data
 library(caret) ##Load package for ML
 library(dplyr) ##Data transformation package
+library(rattle) ##Fancy DT plot
 ```
 
 ```{r setoptions, echo=FALSE}
@@ -69,6 +70,7 @@ if (!file.exists(testFile)) {
 }
 ```
 
+Read the CSV files for training and testing dataset.
 ```{r LoadData}
 trainRaw <- read.csv(trainFile, na.strings=c("NA","#DIV/0!",""))
 testRaw <- read.csv(testFile, na.strings=c("NA","#DIV/0!",""))
@@ -78,13 +80,17 @@ dim(trainRaw)
 ##str(testRaw)
 ##head(trainRaw)
 ##head(testRaw)
-##table(trainRaw$classe)
+table(trainRaw$classe)
 sum(complete.cases(trainRaw))
 ```
+**The raw train data contains `r nrow(trainRaw)` observations and `r ncol(trainRaw)` variables. Whereas the test raw data contains `r nrow(testRaw)` observations and `r ncol(testRaw)` variables**  
 
+From the observation above we can see that there is no complete data set (without missing values).
 ```{r RemoveNA}
-trainRaw <- trainRaw[, colSums(is.na(trainRaw)) == 0] 
-testRaw <- testRaw[, colSums(is.na(testRaw)) == 0] 
-str(trainRaw)
-sum(complete.cases(trainRaw))
+trainClean1 <- trainRaw[, colSums(is.na(trainRaw)) == 0] 
+testClean1 <- testRaw[, colSums(is.na(testRaw)) == 0] 
+##str(trainClean1)
+##dim(trainClean1)
+##sum(complete.cases(trainClean1))
+table(trainClean1$classe)
 ```  

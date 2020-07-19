@@ -51,15 +51,15 @@ Steps Taken
 
 1.Exploratory Data Analysis - Load and tidy data. Remove columns with little/no data.
 
-2.Create training, test and validation data from training data for cross validation checking
+2.Slice data from training data for cross validation checking
 
 3.Predicting using Ensemble Learning Stacking method - combining 3 predictors namely Random Forrest, Gradient Boosted Model and Linear Discriminant Analysis.
 
 4.Fine tune model through combinations of above methods, reduction of input variables or similar. The fine tuning will take into account accuracy first and speed of analysis second.
 
 
-### 2. Exploratory Data Analysis - Load and Tidy Data
-Download the train and test data set
+### 2. Exploratory Data Analysis - Load and Tidy/Clean Data
+First of all we need to download the train and test data set from the link provided
 ```{r DownloadData}
 ## Set the URL and file name for training dataset supplied
 trainUrl <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
@@ -80,28 +80,56 @@ if (!file.exists(testFile)) {
 }
 ```
 
-Read the CSV files for training and testing dataset.
+Secondly after we have have download the files we need to read the CSV files for training and testing dataset.
 ```{r ReadData}
+##Various indicators of missing data (i.e., “NA”, “#DIV/0!” and “”) are all set to NA so they can be processed
 trainRaw <- read.csv(trainFile, na.strings=c("NA","#DIV/0!",""))
 testRaw <- read.csv(testFile, na.strings=c("NA","#DIV/0!",""))
+
 ##dim(trainRaw) ##Observations and variables of raw train dataset
 ##dim(testRaw) ##Observations and variables of raw test dataset
 ##str(trainRaw) ##Structure of the raw train dataset 
 ##str(testRaw) ##Structure of the raw test dataset
-table(trainRaw$classe)
-sum(complete.cases(trainRaw))
-```
-**The raw train data contains `r nrow(trainRaw)` observations and `r ncol(trainRaw)` variables. Whereas the test raw data contains `r nrow(testRaw)` observations and `r ncol(testRaw)` variables**  
 
-From the observation above we can see that there is no complete data set (without missing values).
+table(trainRaw$classe) ##Tabulation of raw train data with the variable (Classe) and its frequency
+sum(complete.cases(trainRaw)) ##Sum of complete rows of a data frame
+```
+
+The raw train data contains `r nrow(trainRaw)` observations and `r ncol(trainRaw)` variables. Whereas the test raw data contains `r nrow(testRaw)` observations and `r ncol(testRaw)` variables.  
+From the observation above we can see that there is no complete data set (without missing values). Therefore we need to remove columns with NA values
+
 ```{r RemoveNA}
+##Remove colums with NAs
 trainClean1 <- trainRaw[, colSums(is.na(trainRaw)) == 0] 
 testClean1 <- testRaw[, colSums(is.na(testRaw)) == 0] 
-##str(trainClean1)
-##str(testClean1)
-##dim(trainClean1)
-##dim(testClean1)
-##sum(complete.cases(trainClean1))
-table(trainClean1$classe)
+
+##str(trainClean1) ##Structure of the raw train dataset after removing NA values
+##str(testClean1) ##Structure of the raw test dataset after removing NA values
+##dim(trainClean1) ##Observations and variables of raw train dataset after removing NA values
+##dim(testClean1) ##Observations and variables of raw test dataset after removing NA values
+
+table(trainClean1$classe) ##Tabulation of train data with the variable (Classe) and its frequency
+sum(complete.cases(trainClean1)) ##Sum of complete rows of a data frame
 ```  
+
+The complete cases (without missing values) is now complete at 19622 rows while maintaining the same amount frequency in the variable "Classe".
+Then we proceed with removing unneccassary columns data such as X, user_name, raw_timestamp_part_1, raw_timestamp_part_2, cvtd_timestamp, new_window and num_window.
+
+```{r RemoveColumns}
+##Remove the first 7 columns as they are not necessary for prediction purpose
+trainFinal <- trainClean1[, -c(1:7)]
+testFinal <- testClean1[, -c(1:7)]
+
+##str(trainFinal) ##Structure of the final train dataset
+##str(testFinal) ##Structure of the final test dataset
+
+dim(trainFinal) ##Observations and variables of final train dataset
+dim(testFinal)  ##Observations and variables of final test dataset
+```
+
+**The final clean train data contains `r nrow(trainFinal)` observations and `r ncol(trainFinal)` variables. Whereas the test raw data contains `r nrow(testFinal)` observations and `r ncol(testFinal)` variables. We have removed a total of 107 variables from the raw data to the final data of both training and test sets.**
+
+### 3. Slice data from training data for cross validation checking
+
+
 

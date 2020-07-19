@@ -1,11 +1,21 @@
 ---
 title: "Machine_Learning - Exercise_Activity_Prediction"
-author: "Willianto"
+author: "Willianto Asalim"
 date: "18/07/2020"
 output: html_document
 ---
 
-```{r LoadPackages, echo=FALSE}
+##### The platform specification used:
+Spec    | Description
+------- | -----------------------
+OS      | Windows 10 Pro - 64 bit
+CPU     | AMD Ryzen 5 - 3400G
+RAM     | 16GB DDR4 3000MHz
+Storage | 500GB SSD - M.2 NVMe (PCIe) 
+Tool    | RStudio
+
+
+```{r LoadPackages, echo=FALSE, warning=FALSE, message=FALSE}
 library(knitr) ##Load Knitr package
 library(ggplot2) ##Plotting and data
 library(caret) ##Load package for ML
@@ -71,15 +81,13 @@ if (!file.exists(testFile)) {
 ```
 
 Read the CSV files for training and testing dataset.
-```{r LoadData}
+```{r ReadData}
 trainRaw <- read.csv(trainFile, na.strings=c("NA","#DIV/0!",""))
 testRaw <- read.csv(testFile, na.strings=c("NA","#DIV/0!",""))
-dim(trainRaw)
-##dim(testRaw)
-##str(trainRaw)
-##str(testRaw)
-##head(trainRaw)
-##head(testRaw)
+##dim(trainRaw) ##Observations and variables of raw train dataset
+##dim(testRaw) ##Observations and variables of raw test dataset
+##str(trainRaw) ##Structure of the raw train dataset 
+##str(testRaw) ##Structure of the raw test dataset
 table(trainRaw$classe)
 sum(complete.cases(trainRaw))
 ```
@@ -90,7 +98,10 @@ From the observation above we can see that there is no complete data set (withou
 trainClean1 <- trainRaw[, colSums(is.na(trainRaw)) == 0] 
 testClean1 <- testRaw[, colSums(is.na(testRaw)) == 0] 
 ##str(trainClean1)
+##str(testClean1)
 ##dim(trainClean1)
+##dim(testClean1)
 ##sum(complete.cases(trainClean1))
 table(trainClean1$classe)
 ```  
+

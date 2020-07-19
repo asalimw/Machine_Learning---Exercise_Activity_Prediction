@@ -116,7 +116,7 @@ The complete cases (without missing values) is now complete at 19622 rows while 
 Then we proceed with removing unneccassary columns data such as X, user_name, raw_timestamp_part_1, raw_timestamp_part_2, cvtd_timestamp, new_window and num_window.
 
 ```{r RemoveColumns}
-##Remove the first 7 columns as they are not necessary for prediction purpose
+##Remove the first 7 columns as they are not necessary for modeling purpose
 trainFinal <- trainClean1[, -c(1:7)]
 testFinal <- testClean1[, -c(1:7)]
 
@@ -127,9 +127,21 @@ dim(trainFinal) ##Observations and variables of final train dataset
 dim(testFinal)  ##Observations and variables of final test dataset
 ```
 
-**The final clean train data contains `r nrow(trainFinal)` observations and `r ncol(trainFinal)` variables. Whereas the test raw data contains `r nrow(testFinal)` observations and `r ncol(testFinal)` variables. We have removed a total of 107 variables from the raw data to the final data of both training and test sets.**
+**The final clean train data contains `r nrow(trainFinal)` observations and `r ncol(trainFinal)` variables. Whereas the test raw data contains `r nrow(testFinal)` observations and `r ncol(testFinal)` variables. We have removed a total of 107 variables from the raw data to the final data of both training and test datasets.**
 
 ### 3. Slice data from training data for cross validation checking
 
+The training data is divided into two parts. This first is the training set with 70% of the original training data and it will be used to train the model. The second is a validation set used to assess model performance.
 
+```{r SliceData}
+set.seed(12345) # For reproducibile purpose
 
+#Partition rows into training-70% and validation-30%
+inTrain <- createDataPartition(trainFinal$classe, p=0.70, list=FALSE)
+trainData <- trainFinal[inTrain, ]
+validateData <- trainFinal[-inTrain,]
+
+##dim(trainData) ##Observations and variables of final partitioned train dataset
+##dim(validateData) ##Observations and variables of final partitioned validation dataset
+```
+The partitioned train data contains `r nrow(trainData)` observations and `r ncol(trainData)` variables. Whereas the validation data contains `r nrow(validateData)` observations and `r ncol(validateData)` variables.

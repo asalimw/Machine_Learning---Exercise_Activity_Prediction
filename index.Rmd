@@ -9,7 +9,7 @@ output: html_document
 library(knitr) ##Load Knitr package
 library(ggplot2) ##Plotting and data
 library(caret) ##Load package for ML
-library(car) ##Load package for VIF output
+library(dplyr) ##Data transformation package
 ```
 
 ```{r setoptions, echo=FALSE}
@@ -38,7 +38,7 @@ The goal of this project is to predict the manner in which they did the exercise
 
 Steps Taken
 
-1.Load and tidy data. Remove columns with little/no data.
+1.Exploratory Data Analysis - Load and tidy data. Remove columns with little/no data.
 
 2.Create training, test and validation data from training data for cross validation checking
 
@@ -47,5 +47,44 @@ Steps Taken
 4.Fine tune model through combinations of above methods, reduction of input variables or similar. The fine tuning will take into account accuracy first and speed of analysis second.
 
 
-## Including Plots
+### 2. Exploratory Data Analysis - Load and Tidy Data
+Download the train and test data set
+```{r DownloadData}
+## Set the URL and file name for training dataset supplied
+trainUrl <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+trainFile <- "./data/ML-Train.csv"
 
+## Set the URL and file name for testing dataset supplied
+testUrl <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+testFile <- "./data/ML-Test.csv"
+
+if (!file.exists("./data")) {
+  dir.create("./data")
+}
+if (!file.exists(trainFile)) {
+  download.file(trainUrl, destfile=trainFile, method="curl")
+}
+if (!file.exists(testFile)) {
+  download.file(testUrl, destfile=testFile, method="curl")
+}
+```
+
+```{r LoadData}
+trainRaw <- read.csv(trainFile, na.strings=c("NA","#DIV/0!",""))
+testRaw <- read.csv(testFile, na.strings=c("NA","#DIV/0!",""))
+dim(trainRaw)
+##dim(testRaw)
+##str(trainRaw)
+##str(testRaw)
+##head(trainRaw)
+##head(testRaw)
+##table(trainRaw$classe)
+sum(complete.cases(trainRaw))
+```
+
+```{r RemoveNA}
+trainRaw <- trainRaw[, colSums(is.na(trainRaw)) == 0] 
+testRaw <- testRaw[, colSums(is.na(testRaw)) == 0] 
+str(trainRaw)
+sum(complete.cases(trainRaw))
+```  

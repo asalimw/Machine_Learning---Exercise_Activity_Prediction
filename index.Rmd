@@ -59,7 +59,7 @@ This is the "classe" variable in the training set. This report will consist deta
 
 
 ### 2. Exploratory Data Analysis
-First of all we need to download the train and test data set from the link provided and below method is how we do it.
+First of all we need to download the train and test data set from the link provided.
 ```{r DownloadData}
 ## Set the URL and file name for training dataset supplied
 trainUrl <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"

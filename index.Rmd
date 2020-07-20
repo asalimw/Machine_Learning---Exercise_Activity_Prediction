@@ -21,6 +21,7 @@ library(ggplot2) ##Plotting and data
 library(caret) ##Load package for ML
 library(dplyr) ##Data transformation package
 library(rattle) ##Fancy DT plot
+library(SparseM) ##SVM predictor
 ```
 
 ```{r setoptions, echo=FALSE}
@@ -149,15 +150,55 @@ The partitioned train data contains `r nrow(trainData)` observations and `r ncol
 ### 4. Building Model
 We will be building three different models namely Random Forrest, Gradient Boosted Model and Linear Discriminant Analysis.
 
-```{r ModelFit}
+```{r ModelFit, cache=TRUE}
 ##Random Forest Model Fit
 modRf <- train(classe ~., method="rf", data=trainData, trControl=trainControl(method="cv"),number=3)
-modRf
 
 ##Gradient Boosted Model Fit
 ModGbm <- train(classe~., method="gbm", data=trainData, verbose=FALSE)
 
 ##Linear Discriminant Analysis Model Fit
 modLda <- train(classe~., method="lda", data=trainData)
+```
+
+```{r PredictionCrossValidation, cache=TRUE}
+predRf <- predict(modRf, newdata=validateData)
+
+predGbm <- predict(ModGbm, newdata=validateData)
+
+predLda <- predict(modLda, newdata=validateData)
+
+```
+
+
+```{r combinedPredictors, cache=True}
+predDF <- data.frame(predRf, predGbm, predLda, classe=validateData$classe)
+combModFit <- train(classe~., method="rf", data=predDF)
+combPred <- predict(combModFit, data=predDF)
+
+##combModFit2 <- train(classe~., method="gbm", data=predDF)
+##combPred2 <- predict(combModFit2, data=predDF)
+```
+
+```{r AccuracyTest}
+##modRf
+confusionMatrix(predRf, as.factor(validateData$classe))$overall['Accuracy']
+
+##ModGbm
+confusionMatrix(predGbm, as.factor(validateData$classe))$overall['Accuracy']
+
+##modLda
+confusionMatrix(predLda, as.factor(validateData$classe))$overall['Accuracy']
+
+confusionMatrix(combPred, as.factor(validateData$classe))$overall['Accuracy']
+
+```
+
+
+### 5. Predicting Test Result
+
+```{r PredictTest, cache=TRUE}
+predTest <- predict(modRf, newdata=testFinal)
+predTest
 
 ```

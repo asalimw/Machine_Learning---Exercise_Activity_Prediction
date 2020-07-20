@@ -2,7 +2,7 @@
 title: "Machine_Learning - Exercise_Activity_Prediction"
 author: "Willianto Asalim"
 date: "18/07/2020"
-output: html_document
+output: md_document
 ---
 
 ##### The platform specification used:

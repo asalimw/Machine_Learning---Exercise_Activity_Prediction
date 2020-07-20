@@ -189,14 +189,8 @@ accuracy
 ```
 Based on results, the Random Forest prediction is far better than the other models.
 
-```{r SampleError}
-rfAccuracy <- as.numeric(confusionMatrix(predRf, as.factor(validateData$classe))$overall['Accuracy'])
-sampleError <- 1 - rfAccuracy
-sampleError
-```
-
 ### 5. Conclusion
-From the accuracy test that we have carried out above, Random Forest model has higher accuracy of `r rfAccuracy' with estimated expected out of sample error of `r sampleError`. Therefore Random Forest model will be used to predict the test cases.
+From the accuracy test that we have carried out above, Random Forest model has higher accuracy of 99.52421% with estimated expected out of sample error of 0.47579% Therefore Random Forest model will be used to predict the test cases.
 
 ### 6. Predicting Test Result
 Information on different prediction classes on the test cases

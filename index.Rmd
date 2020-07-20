@@ -20,8 +20,6 @@ library(knitr) ##Load Knitr package
 library(ggplot2) ##Plotting and data
 library(caret) ##Load package for ML
 library(dplyr) ##Data transformation package
-library(rattle) ##Fancy DT plot
-library(SparseM) ##SVM predictor
 ```
 
 ```{r setoptions, echo=FALSE}
@@ -46,21 +44,22 @@ Class A corresponds to the specified execution of the exercise, while the other 
 
 More information is available from the website here: [Human Activity Recognition info](http://web.archive.org/web/20161224072740/http:/groupware.les.inf.puc-rio.br/har) (see the section on the Weight Lifting Exercise Dataset).
 
-The goal of this project is to predict the manner in which they did the exercise. This is the "classe" variable in the training set. A report describing how to build the model, how to use cross validation, what are the expected out of sample error is, and why the choices are being made.
+#### The goal of this project is to predict the manner in which they did the exercise. 
+This is the "classe" variable in the training set. This report will consist detail on
+1. How to build the model?
+2. How to use cross validation? 
+3. What the expected out of sample error is, 
+4. Why the choices are being made.
 
-Steps Taken
-
-1.Exploratory Data Analysis - Load and tidy data. Remove columns with little/no data.
-
-2.Slice data from training data for cross validation checking
-
-3.Predicting using Ensemble Learning Stacking method - combining 3 predictors namely Random Forrest, Gradient Boosted Model and Linear Discriminant Analysis.
-
-4.Fine tune model through combinations of above methods, reduction of input variables or similar. The fine tuning will take into account accuracy first and speed of analysis second.
+#### What steps to achieve the above objective?
+1.Perform Exploratory Data Analysis
+2.Slice data from training data into two parts for training and cross validation checking
+3.Build 3 different model namely Random Forrest, Gradient Boosted Model and Linear Discriminant Analysis.
+4.Check which model has the highest accuracy and what is the expected out sample error for that model.
 
 
-### 2. Exploratory Data Analysis - Load and Tidy/Clean Data
-First of all we need to download the train and test data set from the link provided
+### 2. Exploratory Data Analysis
+First of all we need to download the train and test data set from the link provided and below method is how we do it.
 ```{r DownloadData}
 ## Set the URL and file name for training dataset supplied
 trainUrl <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
@@ -81,7 +80,7 @@ if (!file.exists(testFile)) {
 }
 ```
 
-Secondly after we have have download the files we need to read the CSV files for training and testing dataset.
+After the files are download, we need to read the CSV files and explore in detail the training and testing dataset using the method here.
 ```{r ReadData}
 ##Various indicators of missing data (i.e., “NA”, “#DIV/0!” and “”) are all set to NA so they can be processed
 trainRaw <- read.csv(trainFile, na.strings=c("NA","#DIV/0!",""))
@@ -97,8 +96,11 @@ sum(complete.cases(trainRaw)) ##Sum of complete rows of a data frame
 ```
 
 The raw train data contains `r nrow(trainRaw)` observations and `r ncol(trainRaw)` variables. Whereas the test raw data contains `r nrow(testRaw)` observations and `r ncol(testRaw)` variables.  
-From the observation above we can see that there is no complete data set (without missing values). Therefore we need to remove columns with NA values
+From the observation above we can see that there is no complete data set (without missing values). 
 
+We need to tidy and clean the data to improve the speed and accuracy of the model. First we remove all the data with NA values followed by removing columns that are not relevant to our model prediction. 
+
+Below is the method used to remove NA values in both datasets.
 ```{r RemoveNA}
 ##Remove colums with NAs
 trainClean1 <- trainRaw[, colSums(is.na(trainRaw)) == 0] 
@@ -114,7 +116,7 @@ sum(complete.cases(trainClean1)) ##Sum of complete rows of a data frame
 ```  
 
 The complete cases (without missing values) is now complete at 19622 rows while maintaining the same amount frequency in the variable "Classe".
-Then we proceed with removing unneccassary columns data such as X, user_name, raw_timestamp_part_1, raw_timestamp_part_2, cvtd_timestamp, new_window and num_window.
+Then we proceed with removing unneccassary columns data such as X, user_name, raw_timestamp_part_1, raw_timestamp_part_2, cvtd_timestamp, new_window and num_window using method below.
 
 ```{r RemoveColumns}
 ##Remove the first 7 columns as they are not necessary for modeling purpose
@@ -132,7 +134,7 @@ dim(testFinal)  ##Observations and variables of final test dataset
 
 ### 3. Slice data from training data for cross validation checking
 
-The training data is divided into two parts. This first is the training set with 70% of the original training data and it will be used to train the model. The second is a validation set used to validate model performance.
+The training data will be sliced into two parts. This first is the training set with 70% of the original training data and it will be used to train the model. The remaining 30% data is a validation set used to validate model performance. Below is the method carried to slice the training data.
 
 ```{r SliceData}
 set.seed(12345) # For reproducibile purpose
@@ -148,7 +150,7 @@ validateData <- trainFinal[-inTrain,]
 The partitioned train data contains `r nrow(trainData)` observations and `r ncol(trainData)` variables. Whereas the validation data contains `r nrow(validateData)` observations and `r ncol(validateData)` variables.
 
 ### 4. Building Model
-We will be building three different models namely Random Forrest, Gradient Boosted Model and Linear Discriminant Analysis.
+We will be building three different models namely Random Forrest, Gradient Boosted Model and Linear Discriminant Analysis. Please click the link for the detail of [Random Forest](https://en.wikipedia.org/wiki/Random_forest), [Gradient Boosted Model](https://en.wikipedia.org/wiki/Gradient_boosting) and [Linear Discriminant Analysis](https://machinelearningmastery.com/linear-discriminant-analysis-for-machine-learning/) 
 
 ```{r ModelFit, cache=TRUE}
 ##Random Forest Model Fit
@@ -159,46 +161,52 @@ ModGbm <- train(classe~., method="gbm", data=trainData, verbose=FALSE)
 
 ##Linear Discriminant Analysis Model Fit
 modLda <- train(classe~., method="lda", data=trainData)
+
+##Naive Bayes Model Fit
+##modNb <- train(classe~., method="nb", data=trainData)
 ```
 
+The model fit using the training data is tested against the validation data. Predicted values for the validation data are then compared to the actual values. This allows forecasting the accuracy and overall out-of-sample error, which indicate how well the model will perform with other data.
 ```{r PredictionCrossValidation, cache=TRUE}
+
 predRf <- predict(modRf, newdata=validateData)
 
 predGbm <- predict(ModGbm, newdata=validateData)
 
 predLda <- predict(modLda, newdata=validateData)
 
+##predNb <- predict(modNb, newdata=validateData)
 ```
 
+After validation is being carried out, we will look at the accuracy of each model. 
+```{r AccuracyCheck}
+accuracy <- rbind(confusionMatrix(predRf, as.factor(validateData$classe))$overall['Accuracy'],
+                  confusionMatrix(predGbm, as.factor(validateData$classe))$overall['Accuracy'],
+                  confusionMatrix(predLda, as.factor(validateData$classe))$overall['Accuracy'])
+row.names(accuracy) <- c("RF", "GBM", "LDA")
 
-```{r combinedPredictors, cache=True}
-predDF <- data.frame(predRf, predGbm, predLda, classe=validateData$classe)
-combModFit <- train(classe~., method="rf", data=predDF)
-combPred <- predict(combModFit, data=predDF)
+accuracy
+```
+Based on results, the Random Forest prediction is far better than the other models.
 
-##combModFit2 <- train(classe~., method="gbm", data=predDF)
-##combPred2 <- predict(combModFit2, data=predDF)
+```{r SampleError}
+rfAccuracy <- as.numeric(confusionMatrix(predRf, as.factor(validateData$classe))$overall['Accuracy'])
+sampleError <- 1 - rfAccuracy
+sampleError
 ```
 
-```{r AccuracyTest}
-##modRf
-confusionMatrix(predRf, as.factor(validateData$classe))$overall['Accuracy']
+### 5. Conclusion
+From the accuracy test that we have carried out above, Random Forest model has higher accuracy of `r rfAccuracy' with estimated expected out of sample error of `r sampleError`. Therefore Random Forest model will be used to predict the test cases.
 
-##ModGbm
-confusionMatrix(predGbm, as.factor(validateData$classe))$overall['Accuracy']
-
-##modLda
-confusionMatrix(predLda, as.factor(validateData$classe))$overall['Accuracy']
-
-confusionMatrix(combPred, as.factor(validateData$classe))$overall['Accuracy']
-
-```
-
-
-### 5. Predicting Test Result
-
+### 6. Predicting Test Result
+Information on different prediction classes on the test cases
+Class A - exactly according to the specification , 
+Class B - throwing the elbows to the front, 
+Class C - lifting the dumbbell only halfway, 
+Class D - lowering the dumbbell only halfway, 
+Class E - throwing the hips to the front.
 ```{r PredictTest, cache=TRUE}
 predTest <- predict(modRf, newdata=testFinal)
 predTest
-
 ```
+
